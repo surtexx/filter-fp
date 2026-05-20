@@ -48,7 +48,7 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.14"
-        continue-on-error: false
+      continue-on-error: false
 
     - run: pip install requests asyncio github-copilot-sdk
       shell: bash
