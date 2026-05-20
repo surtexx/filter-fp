@@ -83,44 +83,41 @@ async def main():
     else:
         print("Please specify a project key with --project_key or use --all_projects to analyze all projects.")
         return
-    try:
-        client = CopilotClient()
-        await client.start()
+    client = CopilotClient()
+    await client.start()
+    
+    for project_key in project_keys:
+        print(f"\nFetching issues from SonarQube for {project_key}...")
+        issues = get_sonarqube_issues(project_key, sonarqube_url, token)
         
-        for project_key in project_keys:
-            print(f"\nFetching issues from SonarQube for {project_key}...")
-            issues = get_sonarqube_issues(project_key, sonarqube_url, token)
-            
-            if not issues:
-                print("No open issues found.")
-                continue
-            
-            print(f"Found {len(issues)} issues\n")
-            
-            if args.input:
-                with open(args.input, "r") as f:
-                    fp_issues = set(re.findall(r"\w+:S\d+", f.read()))
-                    print(f"Loaded {len(fp_issues)} false positives from {args.input}")
-                    if args.apply:
-                        filter_fp(f.read(), sonarqube_url, token, issues)
-            else:
-                initial_prompt = create_filter_prompt(issues)
-                session = await client.create_session(model=args.model, on_permission_request=PermissionHandler.approve_all, github_token=os.getenv("GH_TOKEN"))
-                response = await session.send_and_wait(initial_prompt, timeout=300)
-            
-                if args.output:
-                    with open(args.output, "a") as f:
-                        f.write(response.data.content)
-                        print(f"Analysis results saved to {args.output}")
-                else: 
-                    print(response.data.content)
-
+        if not issues:
+            print("No open issues found.")
+            continue
+        
+        print(f"Found {len(issues)} issues\n")
+        
+        if args.input:
+            with open(args.input, "r") as f:
+                fp_issues = set(re.findall(r"\w+:S\d+", f.read()))
+                print(f"Loaded {len(fp_issues)} false positives from {args.input}")
                 if args.apply:
-                    filter_fp(response.data.content, sonarqube_url, token, issues)
+                    filter_fp(f.read(), sonarqube_url, token, issues)
+        else:
+            initial_prompt = create_filter_prompt(issues)
+            session = await client.create_session(model=args.model, on_permission_request=PermissionHandler.approve_all, github_token=os.getenv("GH_TOKEN"))
+            response = await session.send_and_wait(initial_prompt, timeout=300)
         
-        await client.stop()
-    except Exception as e:
-        print(f"Error: {e}")
+            if args.output:
+                with open(args.output, "a") as f:
+                    f.write(response.data.content)
+                    print(f"Analysis results saved to {args.output}")
+            else: 
+                print(response.data.content)
+
+            if args.apply:
+                filter_fp(response.data.content, sonarqube_url, token, issues)
+    
+    await client.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())
