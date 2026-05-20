@@ -1,0 +1,73 @@
+name: "Filter False Positives"
+description: "Filter False Positives findings from SonarQube scans."
+author: "Gheorghe Robert"
+
+inputs:
+  SONAR_TOKEN:
+    description: "SonarQube Authentication Token"
+    required: true
+  SONAR_HOST_URL:
+    description: "SonarQube Host URL"
+    required: true
+  PROJECT_KEY:
+    description: "SonarQube Project Key"
+    required: true
+  TRIGGER_NEW_SCAN:
+    description: "Trigger a new SonarQube scan (true/false)"
+    default: "false"
+  MODEL:
+    description: "Model to use for analysis (default: gpt-4.1, options: gpt-4.1, gpt-5.2, gpt-5.4, claude-sonnet-4.5, claude-sonnet-4.6)"
+    default: "gpt-4.1"
+  APPLY:
+    description: "Apply the filtering of false positives (true/false)"
+    default: "false"
+  OUTPUT_FILE:
+    description: "Output file for dry run results"
+  INPUT_FILE:
+    description: "Input file for apply step"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Shallow clones should be disabled for better analysis
+
+    - name: Fetch artifacts from Dry Run (if needed)
+      if: ${{ inputs.APPLY == 'true' && inputs.INPUT_FILE == '' }}
+      uses: actions/download-artifact@v7
+      with:
+        name: filter-fp-dry-run-results
+        path: ${{ inputs.INPUT_FILE }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.14"
+
+    - run: pip install requests asyncio github-copilot-sdk
+      shell: bash
+
+    - name: Filter False Positives (Dry Run)
+      if: ${{ inputs.APPLY == 'false' }}
+      env:
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+      run: python3 ${{ github.action_path }}/filter_fp.py --model ${{ inputs.MODEL }} --project_key ${{ inputs.PROJECT_KEY }} --output ${{ inputs.OUTPUT_FILE }}
+      shell: bash
+
+    - name: Filter False Positives (Apply)
+      if: ${{ inputs.APPLY == 'true' }}
+      env:
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+      run: python3 ${{ github.action_path }}/filter_fp.py --model ${{ inputs.MODEL }} --project_key ${{ inputs.PROJECT_KEY }} --apply --input ${{ inputs.INPUT_FILE }}
+      shell: bash
+
+    - name: Save results as artifacts
+      if: ${{ inputs.OUTPUT_FILE != '' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: filter-fp-dry-run-results
+        path: ${{ inputs.OUTPUT_FILE }}
