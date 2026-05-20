@@ -16,7 +16,6 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           PROJECT_KEY: "rust"
-          TRIGGER_NEW_SCAN: "false"
           OUTPUT_FILE: "results.txt"
 
   apply:
@@ -33,6 +32,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           PROJECT_KEY: "rust"
-          TRIGGER_NEW_SCAN: "false"
           APPLY: "true"
           INPUT_FILE: "results.txt"
