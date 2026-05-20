@@ -48,9 +48,11 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.14"
+        continue-on-error: false
 
     - run: pip install requests asyncio github-copilot-sdk
       shell: bash
+      continue-on-error: false
 
     - name: Filter False Positives (Dry Run)
       if: ${{ inputs.APPLY == 'false' }}
@@ -60,6 +62,7 @@ runs:
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: python3 ${{ github.action_path }}/filter_fp.py --model ${{ inputs.MODEL }} --project_key ${{ inputs.PROJECT_KEY }} --output ${{ inputs.OUTPUT_FILE }}
       shell: bash
+      continue-on-error: false
 
     - name: Filter False Positives (Apply)
       if: ${{ inputs.APPLY == 'true' }}
@@ -69,6 +72,7 @@ runs:
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: python3 ${{ github.action_path }}/filter_fp.py --model ${{ inputs.MODEL }} --project_key ${{ inputs.PROJECT_KEY }} --apply --input ${{ inputs.INPUT_FILE }}
       shell: bash
+      continue-on-error: false
 
     - name: Save results as artifacts
       if: ${{ inputs.OUTPUT_FILE != '' }}
