@@ -3,36 +3,36 @@ name: Testare Action
 on: workflow_dispatch
 
 jobs:
-    dry-run:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout cod
-              uses: actions/checkout@v4
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cod
+        uses: actions/checkout@v4
 
-            - name: Test Action (Dry Run)
-              uses: ./
-              with:
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-                  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-                  PROJECT_KEY: "rust"
-                  TRIGGER_NEW_SCAN: "false"
-                  OUTPUT_FILE: "results.txt"
+      - name: Test Action (Dry Run)
+        uses: ./
+        with:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          PROJECT_KEY: "rust"
+          TRIGGER_NEW_SCAN: "false"
+          OUTPUT_FILE: "results.txt"
 
-    apply:
-        runs-on: ubuntu-latest
-        needs: dry-run
-        steps:
-            - name: Checkout cod
-              uses: actions/checkout@v4
+  apply:
+    runs-on: ubuntu-latest
+    needs: dry-run
+    steps:
+      - name: Checkout cod
+        uses: actions/checkout@v4
 
-            - name: Test Action (Apply)
-              uses: ./
-              with:
-                  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-                  PROJECT_KEY: "rust"
-                  TRIGGER_NEW_SCAN: "false"
-                  APPLY: "true"
-                  INPUT_FILE: "results.txt"
+      - name: Test Action (Apply)
+        uses: ./
+        with:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          PROJECT_KEY: "rust"
+          TRIGGER_NEW_SCAN: "false"
+          APPLY: "true"
+          INPUT_FILE: "results.txt"
