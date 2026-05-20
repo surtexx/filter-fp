@@ -98,10 +98,11 @@ async def main():
         
         if args.input:
             with open(args.input, "r") as f:
-                fp_issues = set(re.findall(r"\w+:S\d+", f.read()))
+                answer = f.read()
+                fp_issues = set(re.findall(r"\w+:S\d+", answer))
                 print(f"Loaded {len(fp_issues)} false positives from {args.input}")
                 if args.apply:
-                    filter_fp(f.read(), sonarqube_url, token, issues)
+                    filter_fp(answer, sonarqube_url, token, issues)
         else:
             initial_prompt = create_filter_prompt(issues)
             session = await client.create_session(model=args.model, on_permission_request=PermissionHandler.approve_all, github_token=os.getenv("GH_TOKEN"))
