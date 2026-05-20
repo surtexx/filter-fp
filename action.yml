@@ -42,7 +42,6 @@ runs:
       uses: actions/download-artifact@v7
       with:
         name: filter-fp-dry-run-results
-        path: ${{ inputs.INPUT_FILE }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
