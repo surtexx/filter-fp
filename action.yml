@@ -9,6 +9,9 @@ inputs:
   SONAR_HOST_URL:
     description: "SonarQube Host URL"
     required: true
+  GITHUB_TOKEN:
+    description: "GitHub Token for Copilot SDK"
+    required: true
   PROJECT_KEY:
     description: "SonarQube Project Key"
     required: true
@@ -54,6 +57,7 @@ runs:
       env:
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+        GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: python3 ${{ github.action_path }}/filter_fp.py --model ${{ inputs.MODEL }} --project_key ${{ inputs.PROJECT_KEY }} --output ${{ inputs.OUTPUT_FILE }}
       shell: bash
 
@@ -62,6 +66,7 @@ runs:
       env:
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+        GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: python3 ${{ github.action_path }}/filter_fp.py --model ${{ inputs.MODEL }} --project_key ${{ inputs.PROJECT_KEY }} --apply --input ${{ inputs.INPUT_FILE }}
       shell: bash
 
